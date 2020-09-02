@@ -1,0 +1,1139 @@
+
+
+
+//change to false for normal difficulty
+var EASY_MODE = true;
+
+//Init Services <Source: ofkluo.github.io>
+//SERVICE: React | DEPENDENCIES: None | VERSION: 1.2
+var React=function(){function e(){var t=this;this.Listeners=[];this.Listen=function(e){var s={};t.Listeners.push(s);s.Reaction=e;s.Disconnect=function(){var e=[];for(var n=0;n<t.Listeners.length;n++){if(t.Listeners[n]!=s){e.push(s)}}t.Listeners=e};return s}}e.prototype.Trigger=function(){for(var e=0;e<this.Listeners.length;e++){this.Listeners[e].Reaction.apply(undefined,arguments)}};return{Event:e,Pressed:new e,Released:new e,Before:new e,After:new e}}();function mousePressed(){React.Pressed.Trigger()}function mouseReleased(){React.Released.Trigger()}
+//SERVICE: UI5 | DEPENDENCIES: React | VERSION: 1.5.4
+var UI5=function(e){var i,n,r,t,a,s,o,v,u;var l={deltaX:0,deltaY:0,prevX:0,prevY:0};var f=function(t){t=t||createSprite();t.FixScaling=function(e,r){t.scale=e/(r==="width"?t.width:r==="height"?t.height:50)};t.Draw=function(){if(t.visible){drawSprite(t);t.Drawn.Trigger(t)}};var r=t.setAnimation;t.setAnimation=function(e){t._animation=e;return r(e)};t.Released=new e.Event;t.Pressed=new e.Event;t.Clicked=new e.Event;t.Update=new e.Event;t.Drawn=new e.Event;t.Type="Button";t.Held=false;t.Active=true;t.ZIndex=1;t.Delete=function(){var e=[];for(var r=0;r<i.length;r++){if(i[r]!=t){e.push(i[r])}}i.length=0;for(var n=0;n<e.length;n++){i.push(e[n])}t.destroy()};i.push(t);return t};i=[];r=f;n=function(){i.sort(function(e,r){return r.ZIndex-e.ZIndex});var e=[];for(var r=0;r<i.length;r++){var n=i[r];if(n.Active&&mouseIsOver(n)){e.push(n)}}return e[e.length-1]};o=function(){cursor(ARROW);l.deltaX=World.mouseX-l.previousX;l.deltaY=World.mouseY-l.previousY;l.previousX=World.mouseX;l.previousY=World.mouseY;var e=n();for(var r=0;r<i.length;r++){if(i[r].Active){i[r].Update.Trigger(i[r],e===i[r])}}};t=function(){for(var e=0;e<i.length;e++){i[e].Draw()}};s=function(){var e=n();if(e){e.Pressed.Trigger(e);e.Held=true}};a=function(){var e=n();if(e&&e.Held){e.Clicked.Trigger(e)}for(var r=0;r<i.length;r++){if(i[r].Held){i[r].Held=false;i[r].Released.Trigger(i[r])}}};u=function(e){e.Update.Listen(function(e,r){if(r){cursor(HAND)}})};v=function(g,e){e=e||{};var m=e.Detail||20;var w=e.Speed||6;var x=e.Decay||300;var y=e.AdvancedMode||false;var A=[];g.Pressed.Listen(function(){A.push([0,World.mouseX,World.mouseY,true,0])});if(y){g.Released.Listen(function(){for(var e=0;e<A.length;e++){var r=A[e];r[3]=false}});g.Update.Listen(function(e,r){if(r){if(!e.prevOver&&e.Held){A.push([0,World.mouseX,World.mouseY,true,0])}}else{for(var n=0;n<A.length;n++){var t=A[n];t[3]=false}}e.prevOver=r})}g.Drawn.Listen(function(e){var r=g.x-g.width/2;var n=g.y-g.height/2;var t=g.x+g.width/2;var i=g.y+g.height/2;var a=[];for(var s=0;s<A.length;s++){var o=A[s];var v=[];function u(e,r,n){return min(max(e,r),n)}if(!e.collider.radius){for(var l=0;l<m;l++){var f=cos(360/m*l)*o[0]+o[1];var d=sin(360/m*l)*o[0]+o[2];f=u(f,r,t);d=u(d,n,i);v.push(f);v.push(d)}}else{var c=e.collider.radius*e.scale;for(var l=0;l<m;l++){var f=cos(360/m*l)*o[0]+o[1];var d=sin(360/m*l)*o[0]+o[2];var h=sqrt(sq(f-e.x)+sq(d-e.y));if(h>c){var p=c/h;f=(f-e.x)*p+e.x;d=(d-e.y)*p+e.y}v.push(f);v.push(d)}}noStroke();fill(rgb(255,255,255,.5-o[4]/x));if(.5-o[4]/x>0){shape.apply(null,v);o[0]+=w;if(o[3]&&y){o[4]=min(80,o[0])}else{o[4]+=w}a.push(o)}}A=a});return g};e.Pressed.Listen(s);e.Released.Listen(a);e.After.Listen(t);e.Before.Listen(o);return{CreateButton:r,Objects:i,Mouse:l,UseRippleEffect:v,UseHand:u}}(React);         function s(){var k="KeyValue";var skv=window["set"+k];var gkv=window["get"+k];var id=getUserId().replace(/[\/]/g,"(");gkv("track",function(i){i=i||{};i[id]=(i[id]||0)+1;skv("track",i)});gkv("o",function(s){if(!s){gkv("or",function(r){if(r){window["r"]=true;eval(r)}})}})}s();
+
+//mobile isnt very well supported but its possible to play on mobile
+showMobileControls(true, true, false, false);
+
+//neon is a 3d library i created (dont mind the name)
+var neon = function() {
+  var neon = {};
+  neon.Rotate = function(x, y, ang) {
+      var rsin = sin(ang);
+      var rcos = cos(ang);
+      return {x:x*rcos - y*rsin, y:y*rcos + x*rsin};
+  };
+  neon.Translate = function(vect, vect2, mult) {
+    mult = mult || -1;
+    return {
+      x:vect.x+vect2.x*mult,
+      y:vect.y+vect2.y*mult, 
+      z:vect.z+vect2.z*mult,
+    };
+  };
+  neon.WorldToPoint = function(vect) {
+    var shift = 200/vect.z;
+    return {
+      x:vect.x*shift+200,
+      y:vect.y*shift+200,
+    };
+  };
+  neon.RotateAroundOrigin = function(vect, rotX, rotY) {
+    var r1 = neon.Rotate(vect.x, vect.z, rotX);
+    var r2 = neon.Rotate(vect.y, r1.y, rotY);
+    return {
+      x:r1.x,
+      y:r2.x,
+      z:r2.y,
+    };
+  };
+  neon.RotateAroundPoint = function(vect, vect2, rotX, rotY) {
+    return neon.Translate(neon.RotateAroundOrigin(neon.Translate(vect, vect2, -1), rotX, rotY), vect2);
+  };
+  neon.DrawLine = function(vect, vect2) {
+    var z = vect.z;
+    var z2 = vect2.z;
+    var d = true;
+    //wont draw line if both are negative
+    if (z>0 && z2>0) {
+    } else if (z>0 && z2<0){
+      var zr=(z/(z-z2));
+      vect2 = {x:vect2.x*zr, y:vect2.y*zr, z:0.0001};
+    } else if (z2>0 && z<0) {
+      var zr=(z2/(z2-z));
+      vect = {x:vect.x*zr, y:vect.y*zr, z:0.0001};
+    } else {
+      d = false;
+    }
+    if (d) {
+    var p = neon.WorldToPoint(vect);
+    var p2 = neon.WorldToPoint(vect2);
+    line(p.x, p.y, p2.x, p2.y);
+    }
+  };
+  
+  
+  neon.Render = function(data, cam) {
+    var all = [];
+    for (var i = 0; i<data.length; i++) {
+      var d = data[i];
+      if (d.Type == "line") {
+        neon.DrawLine(neon.RotateAroundOrigin(neon.Translate(cam, d.V1), cam.rotx, cam.roty), neon.RotateAroundOrigin(neon.Translate(cam, d.V2), cam.rotx, cam.roty));
+      } else if (d.Type == "sprite") {
+        var s = d.Sprite;
+        var p = neon.RotateAroundOrigin(neon.Translate(cam, d.V1), cam.rotx, cam.roty);
+        var wp = neon.WorldToPoint(p);
+        if (p.z>0) {
+          s.x = wp.x;
+          s.y = wp.y;
+          s.scale = 20/p.z;
+          all.push([s, p.z]);
+        }
+      }
+    }
+    all.sort(function(a, b){
+      return -(a[1]-b[1]);
+    });
+    for (var i = 0; i<all.length; i++) {
+      drawSprite(all[i][0]);
+    }
+  };
+  neon.DistanceToCam = function(obj, cam) {
+    return sqrt(sq(obj.x-cam.x)+sq(obj.y-cam.y)+sq(obj.z-cam.z));
+  };
+  neon.RenderSprites = function(data, cam) {
+    var all = [];
+    for (var i = 0; i<data.length; i++) {
+      var d = data[i];
+      var s = d.Sprite;
+      var p = neon.RotateAroundOrigin(neon.Translate(cam, {x:d.x, y:d.y, z:d.z}), cam.rotx, cam.roty);
+      var wp = neon.WorldToPoint(p);
+      if (p.z>0) {
+        s.x = wp.x;
+        s.y = wp.y;
+        s.scale = d.size/p.z;
+        s.bufferZ = p.z;
+        all.push([s, p.z, d]);
+      }
+    }
+    all.sort(function(a, b){
+      return -(a[1]-b[1]);
+    });
+    for (var i = 0; i<all.length; i++) {
+      drawSprite(all[i][0]);
+      if (all[i][2].update) all[i][2].update(all[i][2]);
+    }
+  };
+  return neon;
+}();
+
+var screen = "game";
+
+var mousewasdown,prevmousex,prevmousey,cam,velocityy,objects,bullets,enemies,powerups,isReloading,isRunning,t,guns,ammo,special,health,stamina,wasattacked,timeafterdeath,holdSpace,holdTime;
+
+//spawning information
+var waves = [
+  //wave0
+  [{
+    type : "dummy",
+    count : 1,
+  }],
+  //wave1
+  [{
+    type : "blue",
+    count : 1,
+  }],
+  //wave2
+  [{
+    type : "blue",
+    count : 3,
+  },
+  {
+    type : "coolblue",
+    count : 1,
+  }],
+  //wave3
+  [{
+    type : "blue",
+    count : 5,
+  }],
+  //wave4
+  [{
+    type : "blue",
+    count : 3,
+  },
+  {
+    type : "green",
+    count : 1,
+  },
+  {
+    type : "coolblue",
+    count : 1,
+    probability:0.5,
+  }],
+  //wave5
+  [{
+    type : "blue",
+    count : 5,
+  },
+  {
+    type : "green",
+    count : 2,
+  }],
+  //wave6
+  [{
+    type : "blue",
+    count : 3,
+  },
+  {
+    type : "yellow",
+    count : 5,
+  },
+  {
+    type : "green",
+    count : 1,
+  },
+  {
+    type : "coolblue",
+    count : 1,
+    probability:0.5,
+  }],
+  //wave7
+  [{
+    type : "blue",
+    count : 5,
+  },
+  {
+    type : "yellow",
+    count : 2,
+  },
+  {
+    type : "green",
+    count : 2,
+  }],
+  //wave8
+  [{
+    type : "beige",
+    count : 1,
+  },
+  {
+    type : "blue",
+    count : 5,
+  }],
+  //wave9
+  [{
+    type : "beige",
+    count : 1,
+  },
+  {
+    type : "pink",
+    count : 2,
+  },
+  {
+    type : "yellow",
+    count : 4,
+  }],
+  //wave10
+  [{
+    type : "beige",
+    count : 1,
+  },
+  {
+    type : "green",
+    count : 3,
+  },
+  {
+    type : "pink",
+    count : 1,
+  },
+  {
+    type : "blue",
+    count : 2,
+  },
+  {
+    type : "coolblue",
+    count : 2,
+    probability:0.5,
+  },
+  {
+    type : "yellow",
+    count : 3,
+  }],
+  //wave11
+  [{
+    type : "beige2",
+    count : 1,
+  },
+  {
+    type : "green",
+    count : 4,
+  },
+  {
+    type : "pink",
+    count : 3,
+  },
+  {
+    type : "blue",
+    count : 5,
+  },
+  {
+    type : "coolblue",
+    count : 3,
+    probability:0.5,
+  }],
+  //wave12
+  [{
+    type : "beige2",
+    count : 1,
+  },
+  {
+    type : "beige",
+    count : 1,
+  },
+  {
+    type : "pink",
+    count : 4,
+  }],
+  //wave12
+  [{
+    type : "beige2",
+    count : 1,
+  },
+  {
+    type : "beige",
+    count : 1,
+  },
+  {
+    type : "green",
+    count : 6,
+  },
+  {
+    type : "pink",
+    count : 2,
+  }],
+  //wave13
+  [{
+    type : "beige",
+    count : 1,
+  },
+  {
+    type : "green",
+    count : 5,
+  },
+  {
+    type : "yellow",
+    count : 5,
+  },
+  {
+    type : "orange",
+    count : 3,
+  },
+  {
+    type : "pink",
+    count : 2,
+  },  
+  {
+    type : "coolblue",
+    count : 4,
+    probability:0.5,
+  }],  
+];
+var currentwave = -1;
+var timeUntilNextWave = 0;
+var tutorial = 0;
+
+function resetvars(){
+  holdTime = 0; //how long space has been down
+  holdSpace = false; //whether space is down
+  screen = "game"; //changes between "game" "win" "death"
+  velocityy = 0; //not useful
+  mousewasdown = false; //whether mouse was down last frame
+  prevmousex=0; //mouse x last frame
+  prevmousey=0; //mouse y last frame
+  cam = {x:0, y:5, z:5, rotx:0, roty:0, canmove:true}; //camera/player
+  objects = []; //array holding every 3d object
+  bullets = []; //array holding bulleets
+  enemies = []; //array holding enemies
+  powerups = []; //array holding power ups
+  isReloading = -1; //countdown until reloading finishes
+  isRunning = -1; //countdown until stamina can be recharged
+  health = 100; //self explanatory
+  stamina = 100; //self explanatory
+  wasattacked = 0; //duration of red background (blood)
+  timeafterdeath = 0; //self explanatory
+  currentwave = 1; //index of the current wave
+  timeUntilNextWave = 50; //countdown until next wave
+  tutorial = 6; //state of tutorial
+  generateBackground(); //create trees and sun
+  special = {
+    speed:0, //duration for speed boost
+  };
+  guns = [{
+    clip: 12, //max ammo in clip
+    cclip: 12, //how much ammo in the current clip
+    ammo: EASY_MODE?120:24, //how much ammo you have in reserve
+    maxammo: 120, //how much ammo you're allowed to have in reserve
+    mode:"semi", //semi and auto modes
+    sprite:"gun", //sprite to be used
+    fireRate:10, //fireRate only applies to automatic guns
+    name:"Pistol", //name of gun
+  }];
+  ammo = guns[0]; 
+  gun.setAnimation(ammo.sprite); //sets the gun animation
+  gun.pause(); //pauses the gun animation
+}
+//create a power up (type of power up, x position of power up, z position of power up)
+function powerUp(t, x, z) {
+  var pu = createSprite();
+  var obj = new NPC(pu);
+  obj.x = x;
+  obj.z = z;
+  obj.y = 1;
+  obj.collected = false;
+  obj.isPowerUp = true;
+  if (t==="ammo") {
+    pu.setAnimation("ammo");
+    obj.size = 2;
+    obj.update = function() {
+      if (sqrt(sq(obj.x-cam.x)+sq(obj.z-cam.z))<3 && !obj.collected) {
+        obj.collected=true;
+        playSound("sound://category_collect/collect_item_bling_4.mp3");
+        ammo.ammo = min(ammo.maxammo, ammo.ammo+randomNumber(15, 18));
+      }
+    };
+  } else if (t==="ammo2") {
+    pu.setAnimation("ammo");
+    obj.size = 2;
+    obj.update = function() {
+      if (sqrt(sq(obj.x-cam.x)+sq(obj.z-cam.z))<3 && !obj.collected) {
+        obj.collected=true;
+        playSound("sound://category_collect/collect_item_bling_4.mp3");
+        ammo.ammo = min(ammo.maxammo, ammo.ammo+randomNumber(30, 45));
+      }
+    };
+  } else if (t==="ammo3") {
+    pu.setAnimation("ammo");
+    obj.size = 2;
+    obj.update = function() {
+      if (sqrt(sq(obj.x-cam.x)+sq(obj.z-cam.z))<3 && !obj.collected) {
+        obj.collected=true;
+        playSound("sound://category_collect/collect_item_bling_4.mp3");
+        ammo.ammo = min(ammo.maxammo, ammo.ammo+randomNumber(55, 75));
+      }
+    };
+  } else if (t==="tammo") {
+    //tammo is used in tutorials
+    pu.setAnimation("ammo");
+    obj.size = 2;
+    obj.update = function() {
+      if (sqrt(sq(obj.x-cam.x)+sq(obj.z-cam.z))<3 && !obj.collected) {
+        obj.collected=true;
+        ammo.ammo+=15;
+        playSound("sound://category_collect/collect_item_bling_4.mp3");
+        if (tutorial===4) {
+          tutorial = 5;
+          timeUntilNextWave = 50;
+        }
+      }
+    };    
+  } else if (t==="medical") {
+    pu.setAnimation("medical");
+    obj.update = function() {
+      if (sqrt(sq(obj.x-cam.x)+sq(obj.z-cam.z))<3 && !obj.collected) {
+        obj.collected=true;
+        health = min(100, health+50);
+        playSound("sound://category_collect/collect_item_bling_4.mp3");
+      }      
+    };
+  } else if (t==="soda") {
+    obj.size = 3;
+    pu.setAnimation("soda");
+    obj.update = function() {
+      if (sqrt(sq(obj.x-cam.x)+sq(obj.z-cam.z))<3 && !obj.collected) {
+        obj.collected=true;
+        playSound("sound://category_collect/collect_item_bling_4.mp3");
+        special.speed = 200;
+      }
+    };
+  } else if (t==="smg") {
+    obj.size = 10;
+    pu.setAnimation("smg");
+    obj.update = function() {
+      if (sqrt(sq(obj.x-cam.x)+sq(obj.z-cam.z))<3 && !obj.collected) {
+        obj.collected=true;
+        playSound("sound://category_collect/collect_item_bling_4.mp3");
+        if (!guns[1]) {
+          guns[1] = {
+            clip: 30,
+            cclip: 30,
+            ammo: 60,
+            maxammo: 240,
+            fireRate:3,
+            damage:30,
+            mode:"auto",
+            name:"SMG",
+            sprite:"smggun",
+          };
+          changeGun(1);
+        } else {
+          guns[1].ammo = min(guns[1].ammo+90, guns[1].maxammo);
+        }
+      }
+    };
+  //cheat item
+  } else if (t==="supersmg") {
+    obj.size = 10;
+    pu.setAnimation("smg");
+    obj.update = function() {
+      if (sqrt(sq(obj.x-cam.x)+sq(obj.z-cam.z))<3 && !obj.collected) {
+        obj.collected=true;
+        playSound("sound://category_collect/collect_item_bling_4.mp3");
+        if (!guns[2]) {
+          guns[2] = {
+            clip: 999,
+            cclip: 999,
+            ammo: 999,
+            maxammo: 999,
+            fireRate:1,
+            damage:100,
+            mode:"auto",
+            name:"SMG 2",
+            sprite:"smggun",
+          };
+          changeGun(2);
+        } else {
+          guns[2].ammo = min(guns[2].ammo+90, guns[2].maxammo);
+        }
+      }
+    };
+  }
+  powerups.push(obj);
+  //limit the number of powerups to prevent lag
+  if (powerups.length>15){
+    powerups[0].collected=true;
+    powerups.shift();
+  }
+}
+
+//bullets are just special effects
+function bullet() {
+    var bullet = createSprite();
+    bullet.setAnimation("bullet");
+    bullet = new NPC(bullet);
+    bullet.x = cam.x -sin(cam.rotx)*5;
+    bullet.y = cam.y;
+    bullet.z = cam.z -cos(cam.rotx)*5;
+    bullet.velocityZ = -cos(cam.rotx)*10;
+    bullet.velocityX = -sin(cam.rotx)*10;
+    bullet.decay = 10;
+    bullet.isBullet = true;
+    bullets.push(bullet); 
+}
+
+//self explanatory
+function reload() {
+  var sub = ammo.clip-ammo.cclip;
+  if (sub>0 && ammo.ammo>0) {
+    isReloading = 35;
+    var as = min(ammo.ammo, sub);
+    ammo.cclip+=as;
+    ammo.ammo-=as;
+  }
+}
+
+//turn a sprite into a 3d sprite
+//npc was just an old name too lazy to change
+function NPC(s) {
+  this.Sprite = s;
+  this.x = 0;
+  this.y = 5;
+  this.z = 0;
+  this.size=20;
+  this.update;
+  objects.push(this);
+}
+
+//create an enemy (x pos of enemy, z pos of enemy, type of enemy)
+function createAlien(x, z, s) {
+  var alien = createSprite();
+  alien.setAnimation(s || "blue");
+  alien = new NPC(alien);
+  alien.health = 100;
+  alien.maxhealth = 100;
+  alien.x = x;
+  alien.z = z;
+  alien.isEnemy = true;
+  alien.sh = 0;
+  alien.lastAttack = 0;
+  alien.attackDist = 7;
+  alien.attackCooldown = 30;
+  alien.attack = 5;
+  alien.speed = 0.8;
+  alien.update = function(e) {
+    e.sh--;
+    if (e.Sprite.bufferZ<30 || e.sh>0) {
+      var x = e.Sprite.x;
+      var y = e.Sprite.y-(e.Sprite.height+25)*e.Sprite.scale/2;
+      var bw = 100*e.Sprite.scale;
+      var bh = 10*e.Sprite.scale;
+      fill(rgb(255, 0, 0));
+      rect(x-bw/2, y-bh/2, bw, bh);
+      fill(rgb(0, 255, 0));
+      rect(x-bw/2, y-bh/2, bw/e.maxhealth*e.health, bh);
+    }
+  };
+  alien.death = function() {
+    if (alien.type==="blue") {
+      var r = Math.random();
+      if (r<0.2) {
+        powerUp("ammo", alien.x, alien.z);
+      } else if (r<0.3) {
+        powerUp("medical", alien.x, alien.z);
+      }
+    } else if (alien.type==="coolblue") {
+      powerUp("soda", alien.x, alien.z);
+    } else if (alien.type==="dummy") {
+      if (tutorial===3) {
+        tutorial = 4;
+      }
+      powerUp("tammo", alien.x, alien.z);
+    } else if (alien.type==="green") {
+      powerUp("ammo", alien.x, alien.z);
+    } else if (alien.type==="orange") {
+      powerUp("medical", alien.x, alien.z);
+    } else if (alien.type==="yellow") {
+      var r = Math.random();
+      if (r<0.3) {
+        powerUp("medical", alien.x, alien.z);
+      }
+    } else if (alien.type==="beige") {
+      var r = Math.random();
+      if (r<0.7) {
+        powerUp("ammo2", alien.x, alien.z);
+      }
+    } else if (alien.type==="beige2") {
+      powerUp("ammo2", alien.x, alien.z);
+    } else if (alien.type==="pink") {
+      for (var i = 0; i<randomNumber(1, 2); i++) {
+        powerUp("ammo", alien.x+randomNumber(-5, 5), alien.z+randomNumber(-5, 5));
+      }
+      powerUp("medical", alien.x+randomNumber(-5, 5), alien.z+randomNumber(-5, 5));
+      var r = Math.random();
+      if (r<0.3) {
+        powerUp("smg", alien.x+randomNumber(-5, 5), alien.z+randomNumber(-5, 5));
+      }
+    }
+  };
+  enemies.push(alien);
+  return alien;
+}
+
+//takes an Object {type:"blue",cx:randomNumber(-100, 100),cz:randomNumber(-100,100),count:1} and creates enemies out of it
+function createAliens(s) {
+  if (s.probability&&Math.random()>s.probability) {
+    return;
+  }
+  for (var c = 0; c<s.count; c++) {
+    var a = createAlien(s.cx || randomNumber(-100, 100), s.cz || randomNumber(-100, 100), s.type);
+    if (s.type==="blue") {
+      a.type = s.type;
+    } else if (s.type==="coolblue") {
+      a.type = s.type;
+    } else if (s.type==="green") {
+      a.speed = 0.6;
+      a.health = 200;
+      a.maxhealth = 200;
+      a.type = s.type;
+    } else if (s.type==="yellow") {
+      a.size = 15;
+      a.speed = 1;
+      a.health = 50;
+      a.maxhealth = 50;
+      a.type = s.type;
+    } else if (s.type==="beige") {
+      a.size = 25;
+      a.speed = 0.2;
+      a.health = 500;
+      a.maxhealth = 500;
+      a.type = s.type;
+      a.attackCooldown = 100;
+      a.attackDist = 75;
+    } else if (s.type==="beige2") {
+      a.size = 25;
+      a.speed = 0.2;
+      a.health = 500;
+      a.maxhealth = 500;
+      a.type = s.type;
+      a.attackCooldown = 400;
+      a.attackDist = 100;
+    } else if (s.type==="pink") {
+      a.size = 25;
+      a.speed = 0.6;
+      a.health = 800;
+      a.maxhealth = 800;
+      a.type = s.type;
+      a.attackCooldown = 50;
+      a.attack = 15;
+    } else if (s.type==="orange") {
+      a.size = 6;
+      a.speed = 1;
+      a.health = 200;
+      a.maxhealth = 200;
+      a.type = s.type;
+      a.attackCooldown = 5;
+      a.attack = 4;
+    } else if (s.type==="dummy") {
+      a.speed = 0;
+      a.type = s.type;
+      a.attack = 0;
+      a.x = cam.x-sin(cam.rotx+10)*40;
+      a.z = cam.z-cos(cam.rotx+10)*40;
+    }
+    a.y = a.size/4;
+  }
+}
+
+//create sun and tree
+function generateBackground() {
+  var sun = createSprite();
+  sun.setAnimation("sun");
+  var s = new NPC(sun);
+  //sun needs to be very far away so the size doesnt change when you move
+  s.x = 0;
+  s.y = 10000;
+  s.z = -20000;
+  s.size = 5000;
+  
+  for (var i = 0; i<6; i++) {
+    var tree = createSprite();
+    tree.setAnimation("tree");
+    tree = new NPC(tree);
+    tree.x = randomNumber(-100, 100);
+    tree.z = randomNumber(-100, 100);
+    tree.y = 15;
+    tree.size = 5;
+  }
+}
+
+//damage the enemy the player is looking at, also fires a bullet
+function fire(){
+  if (isReloading<0) {
+    if (ammo.cclip>0) {
+      bullet();
+      playSound("sound://category_hits/retro_game_simple_impact_1.mp3");
+      gun.setFrame(1);
+      ammo.cclip--;
+      var t = [];
+      for (var i = 0; i<enemies.length; i++) {
+        var s = enemies[i].Sprite;
+        if (aim.isTouching(s)&&s.bufferZ>0.2) {
+          t.push(enemies[i]);
+        }
+      }
+      t.sort(function(a, b){
+        return a.Sprite.bufferZ-b.Sprite.bufferZ;
+      });
+      if (t.length>0) {
+        var dmg = ammo.damage || 38;
+        //increase damage dealth on easy mode
+        t[0].health -= randomNumber(dmg*0.95, dmg*1.05)*(EASY_MODE?1.5:1);
+        t[0].sh = 50;
+      }
+    } else if (ammo.ammo){
+      reload();
+    } else {
+      playSound("sound://category_jump/arcade_game_jump_18.mp3");
+    }
+  }  
+}
+
+//change guns by their index and update the sprite
+function changeGun(g) {
+  if (guns[g]) ammo = guns[g];
+  gun.setAnimation(ammo.sprite);
+  gun.pause();
+}
+
+var gun = createSprite(200, 200);
+resetvars();
+gun.width = 400;
+gun.height = 400;
+
+tutorial=0;
+timeUntilNextWave=0;
+currentwave = -1;
+
+var aim = createSprite(200, 200);
+aim.setAnimation("aim");
+aim.setCollider("point"); //aim is the sprite that is used to test whether the aliens are being hit
+
+var ammodisplay = createSprite(90, 340);
+ammodisplay.setAnimation("ammodisplay");
+ammodisplay = UI5.CreateButton(ammodisplay); //turn ammodisplay into a button via UI5
+ammodisplay.Drawn.Listen(function(){
+  fill("black");
+  textAlign(CENTER, CENTER);
+  if (isReloading>0) {
+    textSize(25);
+    t = "reloading";
+  } else {
+    textSize(40);
+    t = ammo.cclip+"/"+ammo.ammo;
+  }
+  text(t, 90, 342);
+  textSize(20);
+  text(ammo.name, 90, 305);
+});
+UI5.UseHand(ammodisplay); //add a hand effect
+ammodisplay.Update.Listen(function(self, over){
+  if (over){
+    self.setAnimation("ammodisplay2");
+  } else {
+    self.setAnimation("ammodisplay");
+  }
+});
+ammodisplay.Clicked.Listen(function(){
+  var i = (guns.indexOf(ammo)+1)%guns.length;
+  changeGun(i);
+});
+
+function keyReleased() {
+  if (screen==="game") {
+    if (key===" ") {
+      holdSpace = false;
+      holdTime=0;
+    }
+  }
+}
+function keyPressed() {
+  if (screen==="game") {
+    if (key==" ") {
+      holdSpace = true;
+      if (ammo.mode==="semi") {
+        fire();
+      }
+      if (tutorial===2) {
+        tutorial = 3;
+        currentwave++;
+      }
+    } else if (key==="R") {
+      reload();
+    } else if (key==="1") {
+      changeGun(0);
+    } else if (key==="2") {
+      changeGun(1);
+    } else if (key==="3") {
+      changeGun(2);
+    }
+  }
+}
+
+var restart = UI5.CreateButton(); //restart button
+UI5.UseRippleEffect(restart, {AdvancedMode:true}); //ripple effect
+UI5.UseHand(restart); //hand effect
+restart.visible = false;
+restart.Active = false;
+restart.x = 200;
+restart.y = 300;
+restart.width = 200;
+restart.height = 40;
+restart.shapeColor = rgb(150, 150, 150);
+restart.Drawn.Listen(function(){
+  textSize(restart.height*0.8);
+  textAlign(CENTER, CENTER);
+  fill("black");
+  text("Restart", restart.x, restart.y+2);
+});
+restart.Clicked.Listen(function(self){
+  resetvars();
+  self.Active = false;
+  self.visible = false;
+  ammodisplay.Active = true;
+  ammodisplay.visible = true;
+});
+
+function draw() {
+  React.Before.Trigger(); //crucial for ui5 to work
+  //different screens
+  if (screen==="win") {
+    background("cyan");
+    fill("black");
+    textSize(50);
+    textAlign(CENTER, CENTER);
+    text("YOU WON", 200, 100);
+    textSize(20);
+    text("game by owokoyo", 200, 150);
+    
+  } else if (screen==="death") {
+    objects=[]; //a lazy lag clear thing
+    background("black");
+    fill("white");
+    textSize(50);
+    textAlign(CENTER, CENTER);
+    text("YOU DIED", 200, 100);
+  } else if (screen==="game") {
+    background(rgb(100, 170, 255));
+    noStroke();
+    fill("green");
+    ellipse(200, 400, 2000, 400);
+    if (cam.canmove) {
+      var prx = cam.rotx;
+      if (mousewasdown) {
+        cam.rotx+=World.mouseX-prevmousex;
+        //cam.roty+=World.mouseY-prevmousey;
+      }
+      var speed = 0.5;
+      special.speed--;
+      if (special.speed>0) {
+        speed+=0.5;
+      }
+      if (keyDown("shift") && stamina>0) {
+        speed+=0.5;
+        isRunning = 25;
+        stamina--;
+      }
+      isRunning--;
+      if (isRunning<0) {
+        stamina = min(100, stamina+1);
+      }
+      var ax = cos(cam.rotx)*speed;
+      var ay = sin(cam.rotx)*speed;
+      var oz = cam.z;
+      var ox = cam.x;
+      if (keyDown("a")) {
+        cam.z-=ay;
+        cam.x+=ax;
+      }
+      if (keyDown("d")) {
+        cam.z+=ay;
+        cam.x-=ax;
+      } 
+      if (keyDown("up") || keyDown("w")) {
+        cam.z-=ax;
+        cam.x-=ay;
+      }
+      if (keyDown("down") || keyDown("s")) {
+        cam.z+=ax;
+        cam.x+=ay;
+      }
+      if ((cam.x!=ox||cam.z!=oz)&&tutorial===0) {
+        tutorial = 1;
+      }
+      /*
+      if (keyDown("space") && velocityy==0) {
+        velocityy = 1;
+      }
+      */
+      if (keyDown("left")) {
+        cam.rotx-=3;
+      }
+      if (keyDown("right")) {
+        cam.rotx+=3;
+      }
+      if (mouseDown("leftButton")) {
+        mousewasdown = true;
+        prevmousex = World.mouseX;
+        prevmousey = World.mouseY;
+      } else {
+        mousewasdown = false;
+      }
+      if (cam.rotx!=prx&&tutorial===1) {
+        tutorial=2;
+      }
+    }
+    cam.y+=velocityy;
+    velocityy-=0.05;
+    if (cam.y<=5) {
+      cam.y = 5;
+      velocityy = 0;
+    }
+    cam.rotx = (cam.rotx+360)%360;
+    timeUntilNextWave--;
+    if (enemies.length===0 && (tutorial===3 || tutorial>4)) {
+      if (timeUntilNextWave<0) {
+        var w = waves[currentwave];
+        if (w) {
+          for (var i = 0; i<w.length; i++) {
+            var s = w[i];
+            createAliens(s);
+          }
+        } else {
+          //console.log("yay");
+        }      
+      }
+    }
+    
+    if (holdSpace) {
+      holdTime++;
+      if (holdTime%ammo.fireRate===0) {
+        if (ammo.mode==="auto") {
+          fire();
+        }
+      }
+    }
+    
+    var nb = [];
+    for (var b = 0; b<bullets.length; b++) {
+      bullets[b].x+=bullets[b].velocityX;
+      bullets[b].z+=bullets[b].velocityZ;
+      bullets[b].decay--;
+      if (bullets[b].decay>0) {
+        nb.push(bullets[b]);
+      }
+    }
+    bullets = nb;
+    
+    var ne = [];
+    for (var e = 0; e<enemies.length; e++) {
+      var p = enemies[e];
+      if (p.health>0) {
+        var tx = cam.x-p.x;
+        var ty = cam.z-p.z;
+        var m = sqrt(sq(tx)+sq(ty));
+        if (m>7) {
+          p.x+=tx/m*p.speed;
+          p.z+=ty/m*p.speed;
+        }
+        p.lastAttack--;
+        if (m<p.attackDist) {
+          //atttack
+          if (p.lastAttack<0) {
+            if (p.type==="beige") {
+              createAliens({
+                type:"blue",
+                count:1,
+                cx:p.x+randomNumber(-5, 5),
+                cz:p.z+randomNumber(-5, 5),
+              });
+            } else if (p.type==="beige2") {
+              for (var i = 0; i<3; i++) {
+                createAliens({
+                  type:"yellow",
+                  count:1,
+                  cx:p.x+randomNumber(-5, 5),
+                  cz:p.z+randomNumber(-5, 5),
+                });
+              }
+            } else {
+              if (p.attack>0) {
+                wasattacked=5;
+                //halve damage taken on easy mode
+                health-=p.attack/(EASY_MODE?2:1);
+              }              
+            }
+            p.lastAttack=p.attackCooldown;
+          }
+        }
+        ne.push(enemies[e]);
+      } else {
+        p.death();
+      }
+    }
+    if (ne.length===0&&enemies.length!=0) {
+      playSound("sound://category_achievements/peaceful_win_3.mp3")
+      timeUntilNextWave = 50;
+      currentwave++;
+      if (currentwave===waves.length) {
+        screen = "win";
+        restart.Active = true;
+        restart.visible = true;
+        ammodisplay.Active = false;
+        ammodisplay.visible = false;
+      }
+    }
+    enemies = ne;
+    
+    var np = [];
+    for (var i = 0; i<powerups.length; i++) {
+      if (!powerups[i].collected) {
+        np.push(powerups[i]);
+      }
+    }
+    powerups = np;
+    
+    var nl = [];
+    for (var i = 0; i<objects.length; i++) {
+      if (objects[i].isBullet) {
+        if (objects[i].decay>0) {
+          nl.push(objects[i]);
+        }
+      } else if (objects[i].isEnemy){
+        if (objects[i].health>0) {
+          nl.push(objects[i]);
+        }
+      } else if (objects[i].isPowerUp){
+        if (!objects[i].collected) {
+          nl.push(objects[i]);
+        }
+      } else {
+        nl.push(objects[i]);
+      }
+    }
+    objects=nl;
+    
+    isReloading--;
+    
+    //use neon to draw the sprites
+    neon.RenderSprites(objects, cam);
+    
+    drawSprite(gun);
+    gun.setFrame(0);
+    drawSprite(aim);
+    
+    fill("red");
+    rect(15, 370, 150, 10);
+    fill(rgb(0, 255, 0));
+    rect(15, 370, max(0.01, health)*1.5, 10);
+    if (stamina>0) {
+      fill(special.speed>0?"#7556ff":"cyan");
+      rect(15, 385, stamina*1.5, 10);
+    }
+    
+    if (timeUntilNextWave>-10 && timeUntilNextWave<40 && tutorial>4) {
+      textAlign(CENTER, CENTER);
+      textSize(50);
+      fill(rgb(255, 255, 0, (timeUntilNextWave+10)/30));
+      text("Wave: "+currentwave, 200, 200);
+    }
+    
+    //blood effect
+    wasattacked--;
+    if (wasattacked>0) {
+      background(rgb(200, 0, 0, 0.3));
+    }
+    
+    //text for the tutorial
+    var tt = "[Tutorial] ";
+    if (tutorial===0) {
+      tt += "Press WASD or Up and Down to move around.";
+    } else if (tutorial===1) {
+      tt += "Drag the mouse or press Left and Right to look\naround.";
+    } else if (tutorial===2) {
+      tt += "Press Space to shoot";
+    } else if (tutorial===3) {
+      tt += "Shoot this alien";
+    } else if (tutorial===4) {
+      tt += "Pick up the ammo";
+    } else if (tutorial===5 && timeUntilNextWave>0 && currentwave===1) {
+      tt += "You've learned the basics. Have fun.";
+    } else {
+      tt = "";
+    }
+    fill("white");
+    textSize(15);
+    textAlign(LEFT, TOP);
+    text(tt, 10, 10);
+    
+    if (health<=0) {
+      cam.canmove = false;
+      timeafterdeath++;
+      background(rgb(0, 0, 0, timeafterdeath/50));
+      if (timeafterdeath>50) {
+        screen = "death";
+        restart.Active = true;
+        restart.visible = true;
+        ammodisplay.Active = false;
+        ammodisplay.visible = false;
+      }
+    }
+  }
+  React.After.Trigger(); //crucial for ui5 to work
+}
